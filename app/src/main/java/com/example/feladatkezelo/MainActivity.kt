@@ -286,5 +286,127 @@ fun TaskManagerScreen() {
 @Composable
 fun TaskCard(task: Task, onToggle: (Task) -> Unit, onDelete: () -> Unit, onEdit: (Task) -> Unit)
 {
+    val context = LocalContext.current
+    var showDeleteDialog: Boolean by remember {
+        mutableStateOf(false)
+    }
 
+    var showEditDialog: Boolean by remember {
+        mutableStateOf(false)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            PriorityAvatar(task.priority)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = task.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = task.category,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = when (task.priority) {
+                        1 -> "Alacsony prioritás"
+                        2 -> "Közepes prioritás"
+                        else -> "Magas prioritás"
+                    },
+                    color = when (task.priority) {
+                        1 -> Color(0xFF81C784)
+                        2 -> Color(0xFFFFB74D)
+                        else -> Color(0xFFE57373)
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+            }
+
+            IconButton(
+                onClick = {
+                    showDeleteDialog = true
+                }
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = R.drawable.ic_delete
+                    ), contentDescription = ""
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    showEditDialog = true
+                }
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = R.drawable.ic_edit
+                    ), contentDescription = ""
+                )
+            }
+        }
+
+        Button(
+            onClick = {
+                onToggle(
+                    task.copy(
+                        isCompleted = !task.isCompleted
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Blue,
+                contentColor = Color.White
+            )
+        ) {
+            Text(
+                if (task.isCompleted) {
+                    "Újra aktív
+                } else {
+                    "Elkészült"
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun PriorityAvatar(priority: Int) {
+
+    val backgroundColor = when (priority) {
+        1 -> Color(0xFF81C784)
+        2 -> Color(0xFFFFB74D)
+        else -> Color(0xFFE57373)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(backgroundColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = priority.toString(),
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
 }
