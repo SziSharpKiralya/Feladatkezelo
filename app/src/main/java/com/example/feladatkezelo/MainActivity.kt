@@ -232,5 +232,59 @@ fun TaskManagerScreen() {
         ) {
             Text("Feladat hozzáadása")
         }
+
+        HorizontalDivider()
+
+        if (tasks.isEmpty()) {
+            Text(
+                "Még nincs feladatod.",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = tasks,
+                    key = { task -> task.id }
+                ) { task ->
+                    TaskCard(
+                        task = task,
+                        onToggle = { updatedTask ->
+                            val index = tasks.indexOfFirst {
+                                it.id == updatedTask.id
+                            }
+
+                            if (index != -1) {
+                                tasks[index] = updatedTask
+                            }
+                        },
+                        onDelete = {
+                            tasks.removeAll { it.id == task.id }
+                        },
+                        onEdit = { updatedTask ->
+                            val index = tasks.indexOfFirst {
+                                it.id == updatedTask.id
+                            }
+
+                            if (index != -1) {
+                                tasks[index] = updatedTask
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
+}
+
+@Composable
+fun TaskCard(task: Task, onToggle: (Task) -> Unit, onDelete: () -> Unit, onEdit: (Task) -> Unit)
+{
+
 }
