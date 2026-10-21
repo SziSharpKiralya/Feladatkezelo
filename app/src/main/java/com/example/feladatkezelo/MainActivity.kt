@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -377,9 +378,159 @@ fun TaskCard(task: Task, onToggle: (Task) -> Unit, onDelete: () -> Unit, onEdit:
         ) {
             Text(
                 if (task.isCompleted) {
-                    "Újra aktív
+                    "Újra aktív"
                 } else {
                     "Elkészült"
+                }
+            )
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                },
+                title = { Text("Feladat törlése") },
+                text = { Text("Biztosan törölni szeretnéd a(z) ${task.name} feladatot?") },
+                shape = RoundedCornerShape(12.dp),
+                confirmButton = {
+                    TextButton(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        ),
+                        onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    }) { Text("Törlés") }
+                },
+                dismissButton = {
+                    TextButton(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black
+                        ),
+                        onClick = {
+                        showDeleteDialog = false
+                    }) { Text("Mégsem") }
+                }
+            )
+        }
+
+        if (showEditDialog) {
+            var editName by remember {
+                mutableStateOf("")
+            }
+            var editCategory by remember {
+                mutableStateOf("")
+            }
+            var editPriority by remember {
+                mutableStateOf("")
+            }
+
+            var editNameError by remember {
+                mutableStateOf(false)
+            }
+            var editCategoryError by remember {
+                mutableStateOf(false)
+            }
+            var editPriorityError by remember {
+                mutableStateOf(false)
+            }
+
+            AlertDialog(
+                onDismissRequest = {
+                    showEditDialog = false
+                },
+                title = { Text("Diák szerkesztése") },
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = editName,
+                            onValueChange = { it ->
+                                editName = it
+                                editNameError = false
+                            },
+                            label = { Text("Név") },
+                            supportingText = {
+                                if (editNameError)
+                                    Text(
+                                        "Név megadása kötelező!",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = editCategory,
+                            onValueChange = { it ->
+                                editCategory = it
+                                editCategoryError = false
+                            },
+                            label = { Text("Kategória") },
+                            supportingText = {
+                                if (editCategoryError)
+                                    Text(
+                                        "Kategória megadása kötelező!",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = editPriority,
+                            onValueChange = { it ->
+                                editPriority = it
+                                editPriorityError = false
+                            },
+                            label = { Text("Prioritás (1-3)") },
+                            supportingText = {
+                                if (editPriorityError)
+                                    Text(
+                                        "A prioritás csak 1 és 3 között lehet!",
+                                        color = MaterialTheme.colorScheme.error
+                                    )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        editNameError = editName.isBlank()
+                        editCategoryError = editCategory.isBlank()
+                        editPriorityError = editPriority == null ||
+                                editPriority.toInt() !in 1..3
+                        if (editNameError || editCategoryError || editPriorityError) {
+                            Toast.makeText(
+                                context, "Minden mezőt kell kitölteni",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            val editedStudent = Task(
+                                id = task.id,
+                                name = editName.trim(),
+                                category = editCategory.trim(),
+                                priority = editPriority.toInt(),
+                                isCompleted = task.isCompleted,
+                            )
+                            onEdit(editedStudent)
+                            showEditDialog = false
+
+                        }
+                    }) { Text("Mentés") }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showEditDialog = false
+                    }) { Text("Mégsem") }
                 }
             )
         }
