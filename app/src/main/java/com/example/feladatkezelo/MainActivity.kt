@@ -95,6 +95,19 @@ fun TaskManagerScreen() {
         mutableStateListOf<Task>()
     }
 
+    var selectedFilter by remember {
+        mutableStateOf("Összes")
+    }
+
+    val filteredTasks = tasks.filter { task ->
+        when (selectedFilter) {
+            "Összes" -> true
+            "Aktív" -> !task.isCompleted
+            "Elkészült" -> task.isCompleted
+            else -> true
+        }
+    }
+
     var nameError by remember {
         mutableStateOf(false)
     }
@@ -236,9 +249,45 @@ fun TaskManagerScreen() {
 
         HorizontalDivider()
 
-        if (tasks.isEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            listOf("Összes", "Aktív", "Elkészült").forEach { filter ->
+                if (selectedFilter == filter) {
+                    Button(
+                        onClick = { selectedFilter = filter },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(filter)
+                    }
+                } else {
+                    TextButton(
+                        onClick = { selectedFilter = filter },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(filter)
+                    }
+                }
+            }
+        }
+
+        if (filteredTasks.isEmpty()) {
+            val emptyMessage = when {
+                tasks.isEmpty() ->
+                    "Még nincs feladatod."
+
+                selectedFilter == "Aktív" ->
+                    "Nincs aktív feladat."
+
+                selectedFilter == "Elkészült" ->
+                    "Még nincs elkészült feladat."
+
+                else -> "Még nincs feladatod."
+            }
+
             Text(
-                "Még nincs feladatod.",
+                text = emptyMessage,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyLarge
@@ -251,7 +300,7 @@ fun TaskManagerScreen() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
-                    items = tasks,
+                    items = filteredTasks,
                     key = { task -> task.id }
                 ) { task ->
                     TaskCard(
